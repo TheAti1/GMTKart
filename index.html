@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kart Okuyucu - Koyu Tema</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: inherit;
+            margin-bottom: 20px;
+        }
+        #video {
+            width: 100%;
+            max-width: 720px;
+            height: auto;
+            display: none;
+            margin-top: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            aspect-ratio: 16/9; /* Video için oran belirlendi */
+            object-fit: cover; /* Videoyu çerçeveye tam oturtur */
+        }
+        #sonuc {
+            margin-top: 20px;
+            font-size: 18px;
+            color: inherit;
+            padding: 15px;
+            background-color: #34495e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 720px;
+            text-align: center;
+            transition: background-color 0.5s ease;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            color: white;
+            background-color: #27ae60;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2ecc71;
+        }
+        #manualInput {
+            margin-top: 10px;
+            text-align: center;
+        }
+        #barkodInput {
+            padding: 12px;
+            font-size: 16px;
+            width: 80%;
+            margin-bottom: 5px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            background-color: #34495e;
+            color: #ecf0f1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        #gmt {
+            margin-top: 30px;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: inherit;
+        }
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 30px;
+            background-color: #34495e;
+            border-radius: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: background-color 0.5s ease;
+        }
+        .toggle {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: #ecf0f1;
+            border-radius: 50%;
+            transition: transform 0.5s ease, background-color 0.5s ease;
+            left: 3px;
+            top: 3px;
+        }
+        .sun, .moon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+        .sun {
+            background-color: #f39c12;
+        }
+        .moon {
+            background-color: transparent;
+            position: relative;
+        }
+        .moon::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background-color: #f1c40f;
+            border-radius: 50%;
+            clip-path: inset(0 50% 0 0); /* Yarım ay görünümü */
+        }
+        .dark-theme .theme-switch {
+            background-color: #f1c40f;
+        }
+        .dark-theme .toggle {
+            transform: translateX(30px);
+        }
+        .light-theme .toggle {
+            transform: translateX(0);
+        }
+        .light-theme {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+        }
+        .light-theme #sonuc {
+            background-color: #ecf0f1;
+        }
+        .light-theme #barkodInput {
+            background-color: #fff;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <div class="theme-switch" id="themeSwitch">
+        <div class="toggle"></div>
+        <div class="sun"></div>
+        <div class="moon"></div>
+    </div>
+    <h1>Kart Okuyucu</h1>
+    <button id="toggleButton">Kamerayı Başlat</button>
+    <div id="sonuc"></div>
+
+    <div id="manualInput">
+        <input type="text" id="barkodInput" placeholder="Kart numarasını girin" />
+    </div>
+
+    <button id="manualButton">Kart Numarası Gir</button>
+    
+    <div id="video"></div>
+    <div id="gmt">GMT</div>
+
+    <script>
+        const kullanicilar = [
+            { kart_no: '2371046800014', isim: 'Mehmet Kaan Temiz' },
+            { kart_no: '2371046800021', isim: 'Oğuzhan Turan' },
+            { kart_no: '2371046800168', isim: 'Elif Gökdemir' },
+            { kart_no: '2371046800175', isim: 'Elif Yavuz' },
+            { kart_no: '2371046800182', isim: 'Sercan Ergül' },
+            { kart_no: '2371046800410', isim: 'Halil Erdem Şişman' },
+            { kart_no: '2371046800441', isim: 'Demirhan Tokatlı' },
+            { kart_no: '2371046800571', isim: 'İrem Çalım' },
+            { kart_no: '2371046800199', isim: 'Zeynep Şeyda Sahancı' },
+            { kart_no: '2371046800236', isim: 'Selen Başak Temiz' },
+            { kart_no: '2371046800151', isim: 'Ali Tuna Erdoğan' },
+            { kart_no: '2371046800502', isim: 'Dilara Özdemir' },
+            { kart_no: '2371046800625', isim: 'Semiha Alan' },
+            { kart_no: '2371046800519', isim: 'Seza Berfin Soykan' },
+            { kart_no: '2371046800755', isim: 'Ebru Özlük' },
+            { kart_no: '2371046800748', isim: 'Uzeyr Talha Erdugan' },
+            { kart_no: '2371046800434', isim: 'Zehra Can' },
+            { kart_no: '2371046800731', isim: 'AbdülKerim Altıntaş' },
+            { kart_no: '2371046800700', isim: 'Hasan Bilgehan Kaplan' },
+            { kart_no: '2371046800601', isim: 'Gülsüm Özge Coşkun' },
+            { kart_no: '2371046800144', isim: 'Berkay Eliri' },
+            { kart_no: '2371046800038', isim: 'Tarık Soykan' },
+            { kart_no: '2371046800113', isim: 'Yasin Karaman' },
+            { kart_no: '2371046800090', isim: 'Kübra Aydoğan' },
+            { kart_no: '2371046800137', isim: 'Zehra Yavuz' },
+            { kart_no: '2371046801233', isim: 'Cihan Demir' },
+            { kart_no: '2371046800106', isim: 'Nilsu Yaren Ala' },
+            { kart_no: '2371046800083', isim: 'Habibe Sever' },
+            { kart_no: '2371046800052', isim: 'Ceren Taşkın' },
+            { kart_no: '2371046800076', isim: 'Sena Tümer' },
+            { kart_no: '2371046800045', isim: 'Merve Nur' },
+            { kart_no: '2371046800816', isim: 'Beyza Küçük' },
+            { kart_no: '2371046800809', isim: 'name' }
+        ];
+
+        let cameraActive = false;
+
+        async function checkCameraPermission() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                return stream;
+            } catch (err) {
+                console.error("Kameraya erişim başarısız oldu: ", err);
+                return null;
+            }
+        }
+
+        function startBarkodOkuma() {
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#video'),
+                    constraints: {
+                        facingMode: "environment", 
+                        width: { min: 360, ideal: 720, max: 1280 }, 
+                        height: { min: 240, ideal: 400, max: 720 }
+                    }
+                },
+                decoder: {
+                    readers: ["ean_reader", "upc_reader"]
+                }
+            }, (err) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                Quagga.start();
+                document.getElementById('video').style.display = 'block';
+                cameraActive = true;
+                document.getElementById('toggleButton').innerText = 'Kamerayı Kapat';
+            });
+
+            Quagga.onDetected((data) => {
+                const barkodNumarasi = data.codeResult.code;
+                const kullanici = kullanicilar.find(k => k.kart_no == barkodNumarasi);
+                if (kullanici) {
+                    document.getElementById('sonuc').innerHTML = `<strong>İsim-Soyisim:</strong> ${kullanici.isim} <strong>Barkod:</strong> ${barkodNumarasi}`;
+                } else {
+                    document.getElementById('sonuc').innerText = 'Kayıtlı kullanıcı bulunamadı';
+                }
+
+                Quagga.stop();
+                document.getElementById('video').style.display = 'none';
+                cameraActive = false;
+                document.getElementById('toggleButton').innerText = 'Kamerayı Aç';
+            });
+        }
+
+        document.getElementById('toggleButton').addEventListener('click', async () => {
+            if (cameraActive) {
+                Quagga.stop();
+                document.getElementById('video').style.display = 'none';
+                cameraActive = false;
+                document.getElementById('toggleButton').innerText = 'Kamerayı Aç';
+                document.getElementById('sonuc').innerText = 'Kamera kapatıldı';
+            } else {
+                const stream = await checkCameraPermission();
+                if (stream) {
+                    startBarkodOkuma();
+                } else {
+                    document.getElementById('sonuc').innerText = 'Kamera izni verilmedi.';
+                }
+            }
+        });
+
+        document.getElementById('manualButton').addEventListener('click', () => {
+            const kartNumarasi = document.getElementById('barkodInput').value;
+            const kullanici = kullanicilar.find(k => k.kart_no == kartNumarasi);
+            if (kullanici) {
+                document.getElementById('sonuc').innerHTML = `<strong>İsim-Soyisim:</strong> ${kullanici.isim} <strong>Kart Numarası:</strong> ${kartNumarasi}`;
+            } else {
+                document.getElementById('sonuc').innerText = 'Kayıtlı kullanıcı bulunamadı';
+            }
+        });
+
+        document.getElementById('themeSwitch').addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+            document.body.classList.toggle('light-theme');
+        });
+    </script>
+</body>
+</html>
