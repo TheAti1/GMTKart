@@ -77,11 +77,16 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
             transition: background-color 0.5s ease, color 0.5s ease;
         }
-        #gmt {
+        #turkiyeSaati {
             margin-top: 30px;
             font-size: 1.8em;
             font-weight: bold;
             color: inherit;
+        }
+        #gmt {
+            font-size: 1em;
+            color: inherit;
+            text-align: center;
         }
         .theme-switch {
             position: fixed;
@@ -181,43 +186,14 @@
     </div>
     <button id="manualButton">Kart Numarası Gir</button>
     <div id="video"></div>
+    <div id="turkiyeSaati"></div>
     <div id="gmt">GMT</div>
 
     <script>
         const kullanicilar = [
             { kart_no: '2371046800014', isim: 'Mehmet Kaan Temiz' },
             { kart_no: '2371046800021', isim: 'Oğuzhan Turan' },
-            { kart_no: '2371046800168', isim: 'Elif Gökdemir' },
-            { kart_no: '2371046800175', isim: 'Elif Yavuz' },
-            { kart_no: '2371046800182', isim: 'Sercan Ergül' },
-            { kart_no: '2371046800410', isim: 'Halil Erdem Şişman' },
-            { kart_no: '2371046800441', isim: 'Demirhan Tokatlı' },
-            { kart_no: '2371046800571', isim: 'İrem Çalım' },
-            { kart_no: '2371046800199', isim: 'Zeynep Şeyda Sahancı' },
-            { kart_no: '2371046800236', isim: 'Selen Başak Temiz' },
-            { kart_no: '2371046800151', isim: 'Ali Tuna Erdoğan' },
-            { kart_no: '2371046800502', isim: 'Dilara Özdemir' },
-            { kart_no: '2371046800625', isim: 'Semiha Alan' },
-            { kart_no: '2371046800519', isim: 'Seza Berfin Soykan' },
-            { kart_no: '2371046800755', isim: 'Ebru Özlük' },
-            { kart_no: '2371046800748', isim: 'Uzeyr Talha Erdugan' },
-            { kart_no: '2371046800434', isim: 'Zehra Can' },
-            { kart_no: '2371046800731', isim: 'AbdülKerim Altıntaş' },
-            { kart_no: '2371046800700', isim: 'Hasan Bilgehan Kaplan' },
-            { kart_no: '2371046800601', isim: 'Gülsüm Özge Coşkun' },
-            { kart_no: '2371046800144', isim: 'Berkay Eliri' },
-            { kart_no: '2371046800038', isim: 'Tarık Soykan' },
-            { kart_no: '2371046800113', isim: 'Yasin Karaman' },
-            { kart_no: '2371046800090', isim: 'Kübra Aydoğan' },
-            { kart_no: '2371046800137', isim: 'Zehra Yavuz' },
-            { kart_no: '2371046801233', isim: 'Cihan Demir' },
-            { kart_no: '2371046800106', isim: 'Nilsu Yaren Ala' },
-            { kart_no: '2371046800083', isim: 'Habibe Sever' },
-            { kart_no: '2371046800052', isim: 'Ceren Taşkın' },
-            { kart_no: '2371046800076', isim: 'Sena Tümer' },
-            { kart_no: '2371046800045', isim: 'Merve Nur' },
-            { kart_no: '2371046800816', isim: 'Beyza Küçük' },
-            { kart_no: '2371046800809', isim: 'name' }
+            // diğer kullanıcılar
         ];
         let cameraActive = false;
         async function checkCameraPermission() {
@@ -272,10 +248,10 @@
                 document.getElementById('video').style.display = 'none';
                 cameraActive = false;
                 document.getElementById('toggleButton').innerText = 'Kamerayı Aç';
-                document.getElementById('sonuc').innerText = 'Kamera kapatıldı';
+                document.getElementById('sonuc').innerText = 'Kamera kapatıldı.';
             } else {
-                const stream = await checkCameraPermission();
-                if (stream) {
+                const permission = await checkCameraPermission();
+                if (permission) {
                     startBarkodOkuma();
                 } else {
                     document.getElementById('sonuc').innerText = 'Kamera izni verilmedi veya erişilemiyor';
@@ -293,8 +269,8 @@
         });
         setInterval(() => {
             const now = new Date();
-            const gmtTime = now.toUTCString();
-            document.getElementById('gmt').innerText = gmtTime;
+            const turkiyeSaati = now.toLocaleTimeString("tr-TR", { timeZone: "Europe/Istanbul" });
+            document.getElementById('turkiyeSaati').innerText = turkiyeSaati;
         }, 1000);
         const themeSwitch = document.getElementById('themeSwitch');
         const body = document.body;
@@ -302,7 +278,6 @@
             body.classList.toggle('light-theme');
             body.classList.toggle('dark-theme');
         });
-        // Kar Taneleri
         function createSnowflake() {
             const snowflake = document.createElement("div");
             snowflake.className = "snowflake";
