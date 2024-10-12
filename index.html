@@ -32,8 +32,8 @@
             margin-top: 20px;
             border-radius: 15px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            aspect-ratio: 16/9; /* Video için oran belirlendi */
-            object-fit: cover; /* Videoyu çerçeveye tam oturtur */
+            aspect-ratio: 16/9;
+            object-fit: cover;
         }
         #sonuc {
             margin-top: 20px;
@@ -117,10 +117,6 @@
         .sun {
             background-color: #f39c12;
         }
-        .moon {
-            background-color: transparent;
-            position: relative;
-        }
         .moon::before {
             content: '';
             position: absolute;
@@ -128,7 +124,7 @@
             height: 18px;
             background-color: #f1c40f;
             border-radius: 50%;
-            clip-path: inset(0 50% 0 0); /* Yarım ay görünümü */
+            clip-path: inset(0 50% 0 0);
         }
         .dark-theme .theme-switch {
             background-color: #f1c40f;
@@ -150,6 +146,25 @@
             background-color: #fff;
             color: #2c3e50;
         }
+        /* Kar Taneleri Efekti */
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            background-color: white;
+            opacity: 0.8;
+            border-radius: 50%;
+            width: 10px;
+            height: 10px;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(100vh);
+            }
+        }
     </style>
 </head>
 <body class="dark-theme">
@@ -161,13 +176,10 @@
     <h1>Kart Okuyucu</h1>
     <button id="toggleButton">Kamerayı Başlat</button>
     <div id="sonuc"></div>
-
     <div id="manualInput">
         <input type="text" id="barkodInput" placeholder="Kart numarasını girin" />
     </div>
-
     <button id="manualButton">Kart Numarası Gir</button>
-    
     <div id="video"></div>
     <div id="gmt">GMT</div>
 
@@ -207,19 +219,15 @@
             { kart_no: '2371046800816', isim: 'Beyza Küçük' },
             { kart_no: '2371046800809', isim: 'name' }
         ];
-
         let cameraActive = false;
-
         async function checkCameraPermission() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 return stream;
             } catch (err) {
-                console.error("Kameraya erişim başarısız oldu: ", err);
                 return null;
             }
         }
-
         function startBarkodOkuma() {
             Quagga.init({
                 inputStream: {
@@ -227,8 +235,8 @@
                     type: "LiveStream",
                     target: document.querySelector('#video'),
                     constraints: {
-                        facingMode: "environment", 
-                        width: { min: 360, ideal: 720, max: 1280 }, 
+                        facingMode: "environment",
+                        width: { min: 360, ideal: 720, max: 1280 },
                         height: { min: 240, ideal: 400, max: 720 }
                     }
                 },
@@ -237,7 +245,6 @@
                 }
             }, (err) => {
                 if (err) {
-                    console.error(err);
                     return;
                 }
                 Quagga.start();
@@ -245,7 +252,6 @@
                 cameraActive = true;
                 document.getElementById('toggleButton').innerText = 'Kamerayı Kapat';
             });
-
             Quagga.onDetected((data) => {
                 const barkodNumarasi = data.codeResult.code;
                 const kullanici = kullanicilar.find(k => k.kart_no == barkodNumarasi);
@@ -254,14 +260,12 @@
                 } else {
                     document.getElementById('sonuc').innerText = 'Kayıtlı kullanıcı bulunamadı';
                 }
-
                 Quagga.stop();
                 document.getElementById('video').style.display = 'none';
                 cameraActive = false;
                 document.getElementById('toggleButton').innerText = 'Kamerayı Aç';
             });
         }
-
         document.getElementById('toggleButton').addEventListener('click', async () => {
             if (cameraActive) {
                 Quagga.stop();
@@ -274,25 +278,42 @@
                 if (stream) {
                     startBarkodOkuma();
                 } else {
-                    document.getElementById('sonuc').innerText = 'Kamera izni verilmedi.';
+                    document.getElementById('sonuc').innerText = 'Kamera izni verilmedi veya erişilemiyor';
                 }
             }
         });
-
         document.getElementById('manualButton').addEventListener('click', () => {
-            const kartNumarasi = document.getElementById('barkodInput').value;
-            const kullanici = kullanicilar.find(k => k.kart_no == kartNumarasi);
+            const barkodNumarasi = document.getElementById('barkodInput').value.trim();
+            const kullanici = kullanicilar.find(k => k.kart_no === barkodNumarasi);
             if (kullanici) {
-                document.getElementById('sonuc').innerHTML = `<strong>İsim-Soyisim:</strong> ${kullanici.isim} <strong>Kart Numarası:</strong> ${kartNumarasi}`;
+                document.getElementById('sonuc').innerHTML = `<strong>İsim-Soyisim:</strong> ${kullanici.isim} <strong>Barkod:</strong> ${barkodNumarasi}`;
             } else {
                 document.getElementById('sonuc').innerText = 'Kayıtlı kullanıcı bulunamadı';
             }
         });
-
-        document.getElementById('themeSwitch').addEventListener('click', () => {
-            document.body.classList.toggle('dark-theme');
-            document.body.classList.toggle('light-theme');
+        setInterval(() => {
+            const now = new Date();
+            const gmtTime = now.toUTCString();
+            document.getElementById('gmt').innerText = gmtTime;
+        }, 1000);
+        const themeSwitch = document.getElementById('themeSwitch');
+        const body = document.body;
+        themeSwitch.addEventListener('click', () => {
+            body.classList.toggle('light-theme');
+            body.classList.toggle('dark-theme');
         });
+        // Kar Taneleri
+        function createSnowflake() {
+            const snowflake = document.createElement("div");
+            snowflake.className = "snowflake";
+            snowflake.style.left = `${Math.random() * 100}vw`;
+            snowflake.style.animationDuration = `${Math.random() * 3 + 2}s`;
+            snowflake.style.width = `${Math.random() * 8 + 2}px`;
+            snowflake.style.height = snowflake.style.width;
+            document.body.appendChild(snowflake);
+            setTimeout(() => snowflake.remove(), 5000);
+        }
+        setInterval(createSnowflake, 100);
     </script>
 </body>
 </html>
