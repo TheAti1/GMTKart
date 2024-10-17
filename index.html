@@ -1,6 +1,166 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMT Kart Okuyucu</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <style>
+        body {
+            font-family: 'Cardo', serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            color: #a62b0c;
+            overflow-y: auto;
+        }
+        header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        header img {
+            width: 150px; /* Orta boy logo */
+            height: auto;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #a62b0c;
+            margin-bottom: 20px;
+        }
+        #video {
+            width: 100%;
+            max-width: 720px;
+            height: auto;
+            display: none;
+            margin-top: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+        #sonuc {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #a62b0c;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 720px;
+            text-align: center;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            color: white;
+            background-color: #a62b0c;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #871d09;
+        }
+        #manualInput {
+            margin-top: 10px;
+            text-align: center;
+        }
+        #barkodInput {
+            padding: 12px;
+            font-size: 16px;
+            width: 80%;
+            margin-bottom: 5px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            color: #a62b0c;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        #turkiyeSaati {
+            margin-top: 30px;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #a62b0c;
+        }
+        #gmt {
+            font-size: 1em;
+            color: #a62b0c;
+            text-align: center;
+        }
+        /* Footer stilleri */
+        footer {
+            background-color: #f8f6ed;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-family: 'Cardo', serif;
+            color: #a62b0c;
+            margin-top: 50px;
+            border-top: 1px solid #ddd;
+            width: 100%;
+        }
+
+        .footer-section {
+            flex: 1;
+            padding: 0 20px;
+        }
+
+        .footer-section h3 {
+            color: #a62b0c;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-section ul li a {
+            color: #a62b0c;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section ul li a:hover {
+            color: #871d09;
+        }
+
+        .footer-logo {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .footer-logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 20px;
+            color: #a62b0c;
+        }
+    </style>
+</head>
+<body>
     <!-- Logo alanı -->
     <header>
-        <img src="gmt.png" alt="Logo">
+        <img src="your-logo.png" alt="Logo">
     </header>
 
     <h1>GMT Kart Okuyucu</h1>
@@ -18,7 +178,7 @@
     <footer>
         <div class="footer-section">
             <div class="footer-logo">
-                <img src="gmt.png" alt="Logo">
+                <img src="your-logo.png" alt="Logo">
                 <span>GMT</span>
             </div>
             <p>© Copyright 2023. All Rights Reserved. Powered by KKU Geleceğin Meslekleri Topluluğu</p>
@@ -57,45 +217,7 @@
     <script>
         const kullanicilar = [
             { kart_no: '2371046800014', isim: 'Mehmet Kaan Temiz' },
-            { kart_no: '2371046800021', isim: 'Oğuzhan Turan' },
-            { kart_no: '2371046800168', isim: 'Elif Gökdemir' },
-            { kart_no: '2371046800175', isim: 'Elif Yavuz' },
-            { kart_no: '2371046800182', isim: 'Sercan Ergül' },
-            { kart_no: '2371046800410', isim: 'Halil Erdem Şişman' },
-            { kart_no: '2371046800441', isim: 'Demirhan Tokatlı' },
-            { kart_no: '2371046800571', isim: 'İrem Çalım' },
-            { kart_no: '2371046800199', isim: 'Zeynep Şeyda Sahancı' },
-            { kart_no: '2371046800236', isim: 'Selen Başak Temiz' },
-            { kart_no: '2371046800151', isim: 'Ali Tuna Erdoğan' },
-            { kart_no: '2371046800502', isim: 'Dilara Özdemir' },
-            { kart_no: '2371046800625', isim: 'Semiha Alan' },
-            { kart_no: '2371046800519', isim: 'Seza Berfin Soykan' },
-            { kart_no: '2371046800755', isim: 'Ebru Özlük' },
-            { kart_no: '2371046800748', isim: 'Uzeyr Talha Erdugan' },
-            { kart_no: '2371046800434', isim: 'Zehra Can' },
-            { kart_no: '2371046800731', isim: 'AbdülKerim Altıntaş' },
-            { kart_no: '2371046800700', isim: 'Hasan Bilgehan Kaplan' },
-            { kart_no: '2371046800601', isim: 'Gülsüm Özge Coşkun' },
-            { kart_no: '2371046800144', isim: 'Berkay Eliri' },
-            { kart_no: '2371046800038', isim: 'Tarık Soykan' },
-            { kart_no: '2371046800113', isim: 'Yasin Karaman' },
-            { kart_no: '2371046800090', isim: 'Kübra Aydoğan' },
-            { kart_no: '2371046800137', isim: 'Zehra Yavuz' },
-            { kart_no: '2371046801233', isim: 'Cihan Demir' },
-            { kart_no: '2371046800106', isim: 'Nilsu Yaren Ala' },
-            { kart_no: '2371046800083', isim: 'Habibe Sever' },
-            { kart_no: '2371046800052', isim: 'Ceren Taşkın' },
-            { kart_no: '2371046800076', isim: 'Sena Tümer' },
-            { kart_no: '2371046800045', isim: 'Merve Nur' },
-            { kart_no: '2371046800816', isim: 'Beyza Küçük' },
-            { kart_no: '2371046800809', isim: 'name' },
-            { kart_no: '2371046800823', isim: 'Dila Su Aydın' },
-            { kart_no: '2371046800830', isim: 'Melike Ergin' },
-            { kart_no: '2371046800069', isim: 'Batuhan Özarslan' },
-            { kart_no: '2371046800922', isim: 'Eralp Kılıçkaya' },
-            { kart_no: '2371046800991', isim: 'Azra Karakuş' },
-            { kart_no: '2371046800885', isim: 'Elif Sude Tepecik' },
-            { kart_no: '2371046801400', isim: 'Mustafa Köseoğlu' },
+            // Kullanıcılar burada devam ediyor...
         ];
 
         let cameraActive = false;
