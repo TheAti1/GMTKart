@@ -335,6 +335,11 @@
             }
         });
 
+        function updateTime() {
+            const now = new Date();
+            const turkiyeSaati = now.toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" });
+            turkiyeSaatiDiv.innerText = `${turkiyeSaati}`;
+            const utc = now.toUTCString().split(' ')[4];
             gmtDiv.innerText = `GMT`;
         }
 
