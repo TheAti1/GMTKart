@@ -6,8 +6,10 @@
     <title>GMT Kart Okuyucu</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@1,700&family=Inter:wght@400;700&display=swap');
+
         body {
-            font-family: 'Cardo', serif;
+            font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -17,20 +19,27 @@
             color: #a62b0c;
             overflow-y: auto;
         }
+
         header {
             width: 100%;
             text-align: center;
             margin-bottom: 20px;
         }
+
         header img {
             width: 120px; /* Orta boy logo */
             height: auto;
         }
+
         h1 {
+            font-family: 'Cardo', serif;
             font-size: 2.5em;
             color: #a62b0c;
             margin-bottom: 20px;
+            font-style: italic;
+            font-weight: bold;
         }
+
         #video {
             width: 100%;
             max-width: 720px;
@@ -42,6 +51,7 @@
             aspect-ratio: 16/9;
             object-fit: cover;
         }
+
         #sonuc {
             margin-top: 20px;
             font-size: 18px;
@@ -54,6 +64,7 @@
             max-width: 720px;
             text-align: center;
         }
+
         button {
             padding: 12px 24px;
             font-size: 16px;
@@ -64,13 +75,16 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         button:hover {
             background-color: #871d09;
         }
+
         #manualInput {
             margin-top: 10px;
             text-align: center;
         }
+
         #barkodInput {
             padding: 12px;
             font-size: 16px;
@@ -82,17 +96,20 @@
             color: #a62b0c;
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
+
         #turkiyeSaati {
             margin-top: 30px;
             font-size: 1.8em;
             font-weight: bold;
             color: #a62b0c;
         }
+
         #gmt {
             font-size: 1em;
             color: #a62b0c;
             text-align: center;
         }
+
         /* Footer stilleri */
         footer {
             background-color: #f8f6ed;
@@ -100,7 +117,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            font-family: 'Cardo', serif;
+            font-family: 'Inter', sans-serif;
             color: #a62b0c;
             margin-top: 50px;
             border-top: 1px solid #ddd;
@@ -205,10 +222,10 @@
         <div class="footer-section">
             <h3>Sosyal</h3>
             <ul>
-                <li><a href="#">Etkinliklerimiz</a></li>
-                <li><a href="#">Hakkımızda</a></li>
-                <li><a href="#">Anlaşmalı Yerler</a></li>
-                <li><a href="#">Anasayfa</a></li>
+                <li><a href="https://kkugmt.com/etkinliklerimiz/">Etkinliklerimiz</a></li>
+                <li><a href="https://kkugmt.com/hakkimizda/">Hakkımızda</a></li>
+                <li><a href="https://kkugmt.com/gmtkart/">Anlaşmalı Yerler</a></li>
+                <li><a href="https://kkugmt.com/">Anasayfa</a></li>
             </ul>
         </div>
     </footer>
@@ -258,88 +275,79 @@
             { kart_no: '2371046801400', isim: 'Mustafa Köseoğlu' },
         ];
 
-        let cameraActive = false;
+        const video = document.getElementById('video');
+        const sonucDiv = document.getElementById('sonuc');
+        const toggleButton = document.getElementById('toggleButton');
+        const barkodInput = document.getElementById('barkodInput');
+        const manualButton = document.getElementById('manualButton');
+        const turkiyeSaatiDiv = document.getElementById('turkiyeSaati');
+        const gmtDiv = document.getElementById('gmt');
 
-        async function checkCameraPermission() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                return stream;
-            } catch (err) {
-                return null;
+        toggleButton.addEventListener('click', toggleVideo);
+
+        manualButton.addEventListener('click', function() {
+            const barkod = barkodInput.value;
+            checkKartNumarasi(barkod);
+        });
+
+        function toggleVideo() {
+            if (video.style.display === 'none') {
+                video.style.display = 'block';
+                startScanner();
+                toggleButton.textContent = 'Kamerayı Durdur';
+            } else {
+                video.style.display = 'none';
+                stopScanner();
+                toggleButton.textContent = 'Kamerayı Başlat';
             }
         }
 
-        function startBarkodOkuma() {
+        function startScanner() {
             Quagga.init({
                 inputStream: {
-                    name: "Live",
-                    type: "LiveStream",
-                    target: document.querySelector('#video'),
-                    constraints: {
-                        facingMode: "environment",
-                        width: { min: 360, ideal: 720, max: 1280 },
-                        height: { min: 240, ideal: 400, max: 720 }
-                    }
+                    name: 'Live',
+                    type: 'LiveStream',
+                    target: video
                 },
                 decoder: {
-                    readers: ["ean_reader", "upc_reader"]
+                    readers: ['ean_reader']
                 }
-            }, (err) => {
+            }, function(err) {
                 if (err) {
+                    console.error(err);
                     return;
                 }
                 Quagga.start();
-                document.getElementById('video').style.display = 'block';
-                cameraActive = true;
-                document.getElementById('toggleButton').innerText = 'Kamerayı Kapat';
             });
 
-            Quagga.onDetected((data) => {
-                const barkodNumarasi = data.codeResult.code;
-                const kullanici = kullanicilar.find(k => k.kart_no == barkodNumarasi);
-                if (kullanici) {
-                    document.getElementById('sonuc').innerHTML = `<strong>İsim-Soyisim:</strong> ${kullanici.isim} <strong>Barkod:</strong> ${barkodNumarasi}`;
-                } else {
-                    document.getElementById('sonuc').innerText = 'Kayıtlı kullanıcı bulunamadı';
-                }
-                Quagga.stop();
-                document.getElementById('video').style.display = 'none';
-                cameraActive = false;
-                document.getElementById('toggleButton').innerText = 'Kamerayı Aç';
+            Quagga.onDetected(function(result) {
+                const barkod = result.codeResult.code;
+                checkKartNumarasi(barkod);
             });
         }
 
-        document.getElementById('toggleButton').addEventListener('click', async () => {
-            if (cameraActive) {
-                Quagga.stop();
-                cameraActive = false;
-                document.getElementById('video').style.display = 'none';
-                document.getElementById('toggleButton').innerText = 'Kamerayı Aç';
-            } else {
-                const permission = await checkCameraPermission();
-                if (permission) {
-                    startBarkodOkuma();
-                } else {
-                    document.getElementById('sonuc').innerText = 'Kamera izni verilmedi veya erişilemiyor';
-                }
-            }
-        });
+        function stopScanner() {
+            Quagga.stop();
+        }
 
-        document.getElementById('manualButton').addEventListener('click', () => {
-            const barkodNumarasi = document.getElementById('barkodInput').value.trim();
-            const kullanici = kullanicilar.find(k => k.kart_no === barkodNumarasi);
+        function checkKartNumarasi(barkod) {
+            const kullanici = kullanicilar.find(k => k.kart_no === barkod);
             if (kullanici) {
-                document.getElementById('sonuc').innerHTML = `<strong>İsim-Soyisim:</strong> ${kullanici.isim} <strong>Barkod:</strong> ${barkodNumarasi}`;
+                sonucDiv.textContent = `Hoş geldiniz, ${kullanici.isim}!`;
             } else {
-                document.getElementById('sonuc').innerText = 'Kayıtlı kullanıcı bulunamadı';
+                sonucDiv.textContent = 'Kart numarası bulunamadı.';
             }
-        });
+        }
 
-        setInterval(() => {
-            const now = new Date();
-            const turkiyeSaati = now.toLocaleTimeString("tr-TR", { timeZone: "Europe/Istanbul" });
-            document.getElementById('turkiyeSaati').innerText = turkiyeSaati;
-        }, 1000);
+        function updateSaat() {
+            const turkiyeSaati = new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' });
+            turkiyeSaatiDiv.textContent = `${turkiyeSaati}`;
+            
+            const gmtSaati = new Date().toUTCString();
+            gmtDiv.textContent = `GMT;
+        }
+
+        setInterval(updateSaat, 1000);
     </script>
 </body>
 </html>
