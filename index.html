@@ -212,7 +212,6 @@
             transform: translateX(-50%) rotate(55deg) scale(1.05);
         }
         
-        /* MEKTUP TASARIMI */
         .letter {
             position: absolute;
             width: 300px;
@@ -224,9 +223,9 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             z-index: 2;
             transform: translateY(0);
-            transition: all 1s ease;
             cursor: pointer;
             overflow: hidden;
+            transition: transform 0.5s ease;
         }
         
 
@@ -250,10 +249,9 @@
             z-index: 20;
         }
 
-        /* Yeni eklenen: Kağıdın ters dönmüş hali */
-        .letter.flipped {
-            transform: rotate(180deg) rotateY(180deg) rotate(90deg);
-            transition: all 1s ease;
+        .letter.rotate {
+            transform: rotate(90deg);
+            z-index: 20;
         }
 
         /* Mektup kağıdı dokusu */
@@ -272,25 +270,7 @@
             pointer-events: none;
             border-radius: 3px;
         }
-        
-        /* Kağıt katlama çizgisi */
-        .letter:after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(0,0,0,0.05) 100%, 
-                rgba(0,0,0,0.1) 100%, 
-                rgba(0,0,0,0.05) 100%, 
-                transparent
-            );
-            pointer-events: none;
-        }
-        
+
         /* Kaydırılabilir içerik alanı */
         .letter-content-wrapper {
             position: absolute;
@@ -305,21 +285,21 @@
             scrollbar-color: #e94057 #f8c9d6;
             transition: opacity 0.5s ease;
         }
-        
+
         .letter-content-wrapper::-webkit-scrollbar {
             width: 8px;
         }
-        
+
         .letter-content-wrapper::-webkit-scrollbar-track {
             background: #f8c9d6;
             border-radius: 4px;
         }
-        
+
         .letter-content-wrapper::-webkit-scrollbar-thumb {
             background-color: #e94057;
             border-radius: 4px;
         }
-        
+
         .letter-content {
             font-family: 'Caveat', cursive;
             font-size: 1.5rem;
@@ -327,27 +307,34 @@
             color: #333;
             text-align: center;
             transition: opacity 0.5s ease;
-        }
-
-        .letter-back {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .letter-photo.show {
-            opacity: 1;
+            opacity: 1; /* Metin başta görünsün */
+            pointer-events: auto;
         }
 
         .letter-content.hide {
             opacity: 0;
+            pointer-events: none;
         }
-        
+
+        .letter-photo {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+        z-index: 1;
+        transition: transform 0.5 ease;
+        }
+
+        .letter-photo.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         /* Konfeti efekti */
         .confetti {
             position: absolute;
@@ -357,6 +344,7 @@
             opacity: 0;
             z-index: 100;
         }
+
         
         @keyframes confetti-fall {
             0% {
@@ -381,7 +369,6 @@
             <div class="envelope-bottom"></div>
             <div class="envelope-flap"></div>
             <div class="heart-seal"></div>
-            
             <div class="letter">
                 <div class="letter-content-wrapper">
                     <div class="letter-content">
@@ -394,7 +381,7 @@
                     </div>
                 </div>
                 <!-- Fotoğraf ekledim -->
-                <img class="letter-photo" src="https://scontent-prg1-1.xx.fbcdn.net/v/t39.30808-6/464743451_10230023364062139_2532314235661744729_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=b04a48&_nc_ohc=4CClWdmNaK8Q7kNvwFj7yrH&_nc_oc=AdnE8l6QXzBhNAdlPrI7PVnwgIzqqC6V7AGlNTJPd6f_aS0ukyHTHFaC78sMq3aNazWKtg4Ub6vqKJYdhz-YTTyM&_nc_zt=23&_nc_ht=scontent-prg1-1.xx&_nc_gid=_xKdGuJ0xCB5Hpr5yakGHQ&oh=00_AfJXWjivD1Gz9RXk3E-WOowOeQyra32ramXBQ_tALkCWtQ&oe=6826702B" alt=" ">
+                <img class= "letter-photo" src="https://prnt.sc/IHQagCwrTR-_" alt=" ">
             </div>
         </div>
     </div>
@@ -404,13 +391,11 @@
         const envelopeFlap   = document.querySelector('.envelope-flap');
         const letter         = document.querySelector('.letter');
         const letterContent  = document.querySelector('.letter-content');
-        const letterPhoto    = document.querySelector('.letter-back');  // direkt arka yüzü seçiyoruz
+        const letterPhoto    = document.querySelector('.letter-photo');
       
         let isEnvelopeOpen   = false;
         let isLetterExpanded = false;
         let isLetterFlipped  = false;
-      
-        // Drag/touch suppression flag
         let touchHandled     = false;
       
         // 1) Zarf açma
@@ -425,40 +410,41 @@
           }
         });
       
-        // Ortak tap handler
+        // Ortak tıklama işlevi
         function handleLetterTap() {
           if (!isEnvelopeOpen) return;
       
           if (!isLetterExpanded) {
-            // 1. tap: yukarı aç
+            // 1. tık: mektubu yukarı çıkar
             letter.classList.add('expanded');
             isLetterExpanded = true;
       
           } else if (!isLetterFlipped) {
-            // 2. tap: çevir + fotoğraf göster
-            letter.classList.add('flipped');
+            // 2. tık: metni gizle, fotoğrafı göster
             letterContent.classList.add('hide');
-            setTimeout(() => letterPhoto.classList.add('show'), 500);
+            letterPhoto.classList.add('show');
+            letter.classList.add('rotate');
             isLetterFlipped = true;
       
           } else {
-            // 3. tap: geri çevir + içerik göster
-            letter.classList.remove('flipped');
+            // 3. tık: fotoğrafı gizle, metni geri getir
             letterPhoto.classList.remove('show');
-            setTimeout(() => letterContent.classList.remove('hide'), 500);
+            letterContent.classList.remove('hide');
             isLetterFlipped = false;
           }
         }
       
-        // --- Fare (desktop) için drag vs click ---
+        // Mouse click kontrolü
         let mouseDownY = null;
         letter.addEventListener('mousedown', e => {
           mouseDownY = e.clientY;
         });
+      
         letter.addEventListener('click', e => {
-          // Eğer mobil touch handler tetiklediyse click’i yoksay
-          if (touchHandled) { touchHandled = false; return; }
-          // Drag ise yoksay
+          if (touchHandled) {
+            touchHandled = false;
+            return;
+          }
           if (mouseDownY !== null && Math.abs(e.clientY - mouseDownY) > 5) {
             mouseDownY = null;
             return;
@@ -467,7 +453,7 @@
           handleLetterTap();
         });
       
-        // --- Dokunmatik (mobil) için swipe vs tap ---
+        // Dokunmatik kontrol
         let touchStartY = null;
         letter.addEventListener('touchstart', e => {
           if (e.touches.length === 1) {
@@ -478,13 +464,12 @@
         letter.addEventListener('touchend', e => {
           if (touchStartY === null) return;
           const touchEndY = e.changedTouches[0].clientY;
-          // Eğer hareket 10px'den fazla ise scroll, değilse tap
           if (Math.abs(touchEndY - touchStartY) > 10) {
             touchStartY = null;
             return;
           }
           touchStartY = null;
-          touchHandled = true;     // bir sonraki click'i iptal et
+          touchHandled = true;
           handleLetterTap();
         });
       
