@@ -3,347 +3,418 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GMT Kart Okuyucu</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <title>Anneler Günü Kartı</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@1,700&family=Inter:wght@400;700&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500&display=swap');
+        
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f0f5;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f8f6ed;
-            color: #a62b0c;
-            overflow-y: auto;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
         }
-
-        header {
-            width: 100%;
+        
+        .title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            color: #d4517d;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 2rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
         }
-
-        header img {
-            width: 120px; /* Orta boy logo */
-            height: auto;
+        
+        .scene {
+            position: relative;
+            width: 360px;
+            height: 400px;
+            perspective: 1500px;
         }
-
-        h1 {
-            font-family: 'Cardo', serif;
-            font-size: 2.5em;
-            color: #a62b0c;
-            margin-bottom: 20px;
-            font-style: italic;
-            font-weight: bold;
-        }
-
-        #video {
-            width: 100%;
-            max-width: 720px;
-            height: auto;
-            display: none;
-            margin-top: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            aspect-ratio: 16/9;
-            object-fit: cover;
-        }
-
-        #sonuc {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #a62b0c;
-            padding: 15px;
-            background-color: #f0f0f0;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 720px;
-            text-align: center;
-        }
-
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            color: white;
-            background-color: #a62b0c;
-            border: none;
+        
+        /* ZARF TASARIMI */
+        .envelope {
+            position: absolute;
+            width: 340px;
+            height: 220px;
+            top: 50px;
+            left: 10px;
+            background-color: #f3d7d7;
             border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform-style: preserve-3d;
+            transform-origin: center center;
+            z-index: 10;
         }
-
-        button:hover {
-            background-color: #871d09;
+        
+        /* Zarf dokusu */
+        .envelope:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23e0c1c1' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.6;
+            border-radius: 5px;
+            pointer-events: none;
         }
-
-        #turkiyeSaati {
-            margin-top: 30px;
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #a62b0c;
-        }
-
-        #gmt {
-            font-size: 1em;
-            color: #a62b0c;
-            text-align: center;
-        }
-
-        footer {
-            background-color: #f8f6ed;
-            padding: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            font-family: 'Inter', sans-serif;
-            color: #a62b0c;
-            margin-top: 50px;
-            border-top: 1px solid #ddd;
+        
+        /* Zarf gölgesi */
+        .envelope:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            pointer-events: none;
         }
-
-        .footer-section {
-            flex: 1;
-            padding: 0 20px;
+        
+        /* Zarfın arkası */
+        .envelope-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #f3d7d7;
+            border-radius: 5px;
+            z-index: 1;
         }
-
-        .footer-section h3 {
-            color: #a62b0c;
-            font-size: 1.2em;
-            margin-bottom: 15px;
+        
+        /* Zarfın alt üçgeni */
+        .envelope-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 110px;
+            background-color: #eacbcb;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            z-index: 2;
         }
-
-        .footer-section ul {
-            list-style: none;
-            padding: 0;
+        
+        /* Zarfın yan üçgenleri */
+        .envelope-left {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 170px;
+            height: 100%;
+            background-color: #e8c3c3;
+            clip-path: polygon(0 0, 100% 50%, 0 100%);
+            z-index: 3;
         }
-
-        .footer-section ul li {
-            margin-bottom: 10px;
+        
+        .envelope-right {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 170px;
+            height: 100%;
+            background-color: #e8c3c3;
+            clip-path: polygon(100% 0, 0 50%, 100% 100%);
+            z-index: 3;
         }
-
-        .footer-section ul li a {
-            color: #a62b0c;
-            text-decoration: none;
-            transition: color 0.3s;
+        
+        /* Zarfın üst kapağı */
+        .envelope-flap {
+            position: absolute;
+            top: -110px;
+            left: 0;
+            width: 100%;
+            height: 110px;
+            background-color: #ebd0d0;
+            clip-path: polygon(0 100%, 50% 0, 100% 100%);
+            transform-origin: bottom;
+            transition: transform 1s ease;
+            z-index: 4;
+            box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.05);
         }
-
-        .footer-section ul li a:hover {
-            color: #871d09;
+        
+        .envelope-flap.open {
+            transform: rotateX(180deg);
+            z-index: 1;
         }
-
-        .footer-logo {
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
+        
+        /* Kağıt çizgileri zarfın kapağında */
+        .envelope-flap:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                -45deg,
+                rgba(255, 255, 255, 0.1),
+                rgba(255, 255, 255, 0.1) 5px,
+                transparent 5px,
+                transparent 10px
+            );
+            clip-path: polygon(0 100%, 50% 0, 100% 100%);
+            pointer-events: none;
         }
-
-        .footer-logo img {
-            height: 40px;
-            margin-right: 10px;
+        
+        /* Kalp mühür */
+        .heart-seal {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 30px;
+            height: 30px;
+            background-color: #e94057;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            z-index: 5;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
         }
-
-        .footer-bottom {
+        
+        .heart-seal:before,
+        .heart-seal:after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: #e94057;
+            border-radius: 50%;
+        }
+        
+        .heart-seal:before {
+            top: -15px;
+            left: 0;
+        }
+        
+        .heart-seal:after {
+            top: 0;
+            left: -15px;
+        }
+        
+        .heart-seal:hover {
+            transform: translateX(-50%) rotate(50deg) scale(1.05);
+            box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .heart-seal.clicked {
+            transform: translateX(-50%) rotate(55deg) scale(1.05);
+        }
+        
+        /* MEKTUP TASARIMI */
+        .letter {
+            position: absolute;
+            width: 300px;
+            height: 180px;
+            background-color: #fff;
+            top: 20px;
+            left: 20px;
+            z-index: 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 1s ease;
+            cursor: pointer;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .letter.visible {
+            opacity: 1;
+            transform: translateY(0);
+            z-index: 3;
+        }
+        
+        .letter.expanded {
+            transform: translateY(-150px);
+            z-index: 20;
+        }
+        
+        /* Mektup kağıdı dokusu */
+        .letter:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #fff;
+            background-image: 
+                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px),
+                linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            border-radius: 3px;
+        }
+        
+        /* Kağıt katlama çizgisi */
+        .letter:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(0,0,0,0.05) 20%, 
+                rgba(0,0,0,0.1) 50%, 
+                rgba(0,0,0,0.05) 80%, 
+                transparent
+            );
+            pointer-events: none;
+        }
+        
+        .letter-content {
+            padding: 20px;
+            font-family: 'Caveat', cursive;
+            font-size: 1.3rem;
+            line-height: 1.5;
+            color: #333;
             text-align: center;
-            font-size: 0.9em;
-            margin-top: 20px;
-            color: #a62b0c;
+            opacity: 0;
+            transition: opacity 0.5s ease 0.5s;
+        }
+        
+        .letter.expanded .letter-content {
+            opacity: 1;
+        }
+        
+        /* Konfeti efekti */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 100;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-50px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(500px) rotate(720deg);
+                opacity: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Logo alanı -->
-    <header>
-        <img src="gmt.png" alt="Logo">
-    </header>
-
-    <h1>GMT Kart Okuyucu</h1>
-    <button id="toggleButton">Kamerayı Başlat</button>
-    <div id="sonuc"></div>
-    <video id="video" autoplay></video>
-    <div id="turkiyeSaati"></div>
-    <div id="gmt">GMT</div>
-
-    <!-- Footer Başlıyor -->
-    <footer>
-        <div class="footer-section">
-            <div class="footer-logo">
-                <img src="gmt.png" alt="Logo">
-                <span>GMT</span>
+    <h1 class="title">Canım Anneciğim</h1>
+    
+    <div class="scene">
+        <div class="envelope">
+            <div class="envelope-back"></div>
+            <div class="envelope-left"></div>
+            <div class="envelope-right"></div>
+            <div class="envelope-bottom"></div>
+            <div class="envelope-flap"></div>
+            <div class="heart-seal"></div>
+            
+            <div class="letter">
+                <div class="letter-content">
+                    <p>Sevgili Anneciğim,</p>
+                    <p>Bu hayatta bana verdiğin tüm sevgi, emek ve fedakarlıklar için teşekkür ederim.</p>
+                    <p>Sen benim ilk öğretmenim, en iyi arkadaşım ve en büyük kahramanımsın.</p>
+                    <p>Senin gibi bir anneye sahip olduğum için çok şanslıyım.</p>
+                    <p>Anneler Günün Kutlu Olsun!</p>
+                    <p>Seni çok seviyorum ❤️</p>
+                </div>
             </div>
-            <p>© Copyright 2023. All Rights Reserved. Powered by KKU Geleceğin Meslekleri Topluluğu</p>
         </div>
-        
-        <div class="footer-section">
-            <h3>Hakkında</h3>
-            <ul>
-                <li><a href="#">Team</a></li>
-                <li><a href="#">History</a></li>
-                <li><a href="#">Careers</a></li>
-            </ul>
-        </div>
-        
-        <div class="footer-section">
-            <h3>Gizlilik</h3>
-            <ul>
-                <li><a href="#">Privacy Policy</a></li>
-                <li><a href="#">Terms and Conditions</a></li>
-                <li><a href="#">Contact Us</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-section">
-            <h3>Sosyal</h3>
-            <ul>
-                <li><a href="https://kkugmt.com/etkinliklerimiz/">Etkinliklerimiz</a></li>
-                <li><a href="https://kkugmt.com/hakkimizda/">Hakkımızda</a></li>
-                <li><a href="https://kkugmt.com/gmtkart/">Anlaşmalı Yerler</a></li>
-                <li><a href="https://kkugmt.com/">Anasayfa</a></li>
-            </ul>
-        </div>
-    </footer>
-    <!-- Footer Bitiyor -->
+    </div>
 
     <script>
-        const kullanicilar = [
-            { kart_no: '2371046800014', isim: 'Mehmet Kaan Temiz' },
-            { kart_no: '2371046800021', isim: 'Oğuzhan Turan' },
-            { kart_no: '2371046800168', isim: 'Elif Gökdemir' },
-            { kart_no: '2371046800175', isim: 'Elif Yavuz' },
-            { kart_no: '2371046800182', isim: 'Sercan Ergül' },
-            { kart_no: '2371046800410', isim: 'Halil Erdem Şişman' },
-            { kart_no: '2371046800441', isim: 'Demirhan Tokatlı' },
-            { kart_no: '2371046800571', isim: 'İrem Çalım' },
-            { kart_no: '2371046800199', isim: 'Zeynep Şeyda Sahancı' },
-            { kart_no: '2371046800236', isim: 'Selen Başak Temiz' },
-            { kart_no: '2371046800151', isim: 'Ali Tuna Erdoğan' },
-            { kart_no: '2371046800502', isim: 'Dilara Özdemir' },
-            { kart_no: '2371046800625', isim: 'Semiha Alan' },
-            { kart_no: '2371046800519', isim: 'Seza Berfin Soykan' },
-            { kart_no: '2371046800755', isim: 'Ebru Özlük' },
-            { kart_no: '2371046800748', isim: 'Uzeyr Talha Erdugan' },
-            { kart_no: '2371046800434', isim: 'Zehra Can' },
-            { kart_no: '2371046800731', isim: 'AbdülKerim Altıntaş' },
-            { kart_no: '2371046800700', isim: 'Hasan Bilgehan Kaplan' },
-            { kart_no: '2371046800601', isim: 'Gülsüm Özge Coşkun' },
-            { kart_no: '2371046800144', isim: 'Berkay Eliri' },
-            { kart_no: '2371046800038', isim: 'Tarık Soykan' },
-            { kart_no: '2371046800113', isim: 'Yasin Karaman' },
-            { kart_no: '2371046800090', isim: 'Kübra Aydoğan' },
-            { kart_no: '2371046800137', isim: 'Zehra Yavuz' },
-            { kart_no: '2371046801233', isim: 'Cihan Demir' },
-            { kart_no: '2371046800106', isim: 'Nilsu Yaren Ala' },
-            { kart_no: '2371046800083', isim: 'Habibe Sever' },
-            { kart_no: '2371046800052', isim: 'Ceren Taşkın' },
-            { kart_no: '2371046800076', isim: 'Sena Tümer' },
-            { kart_no: '2371046800045', isim: 'Merve Nur' },
-            { kart_no: '2371046800816', isim: 'Beyza Küçük' },
-            { kart_no: '2371046800809', isim: 'name' },
-            { kart_no: '2371046800823', isim: 'Dila Su Aydın' },
-            { kart_no: '2371046800830', isim: 'Melike Ergin' },
-            { kart_no: '2371046800069', isim: 'Batuhan Özarslan' },
-            { kart_no: '2371046800922', isim: 'Eralp Kılıçkaya' },
-            { kart_no: '2371046800991', isim: 'Azra Karakuş' },
-            { kart_no: '2371046800885', isim: 'Elif Sude Tepecik' },
-            { kart_no: '2371046801400', isim: 'Mustafa Köseoğlu' },
-        ];
-
-        const sonucDiv = document.getElementById('sonuc');
-        const video = document.getElementById('video');
-        const toggleButton = document.getElementById('toggleButton');
-        const turkiyeSaatiDiv = document.getElementById('turkiyeSaati');
-        const gmtDiv = document.getElementById('gmt');
-
-        let isCameraRunning = false;
-
-        function showResult(message) {
-            sonucDiv.innerHTML = message;
-        }
-
-        function findUserByCardNumber(cardNumber) {
-            const user = kullanicilar.find(u => u.kart_no === cardNumber);
-            if (user) {
-                return `${user.isim} <br> Kart Numarası: ${user.kart_no}`;
-            } else {
-                return "Kullanıcı bulunamadı.";
-            }
-        }
-
-        function startCamera() {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    video.srcObject = stream;
-                    video.style.display = 'block';
-                    isCameraRunning = true;
-                    toggleButton.innerText = 'Kamerayı Durdur';
-
-                    // Barkod okuma işlemlerini başlat
-                    Quagga.init({
-                        inputStream: {
-                            name: "Live",
-                            type: "LiveStream",
-                            target: video // video elementini hedef olarak ayarlayın
-                        },
-                        decoder: {
-                            readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader"] // Okuyucuları belirleyin
-                        }
-                    }, (err) => {
-                        if (err) {
-                            console.log(err);
-                            return;
-                        }
-                        Quagga.start();
-                        console.log("Barkod okuma başlatıldı");
-                    });
-
-                    Quagga.onDetected((result) => {
-                        const code = result.codeResult.code;
-                        const userDetails = findUserByCardNumber(code);
-                        showResult(`Kullanıcı: ${userDetails}`);
-                        stopCamera(); // Barkod okunduktan sonra kamerayı kapat
-                    });
-                })
-                .catch(err => {
-                    console.error('Kamera açılamadı: ', err);
-                    showResult("Kamera açılamadı.");
-                });
-        }
-
-        function stopCamera() {
-            const stream = video.srcObject;
-            if (stream) {
-                const tracks = stream.getTracks();
-                tracks.forEach(track => track.stop());
-            }
-            video.srcObject = null;
-            video.style.display = 'none';
-            isCameraRunning = false;
-            toggleButton.innerText = 'Kamerayı Başlat';
-            Quagga.stop(); // Barkod okumayı durdur
-        }
-
-        toggleButton.addEventListener('click', () => {
-            if (isCameraRunning) {
-                stopCamera();
-            } else {
-                startCamera();
+        const heartSeal = document.querySelector('.heart-seal');
+        const envelopeFlap = document.querySelector('.envelope-flap');
+        const letter = document.querySelector('.letter');
+        const scene = document.querySelector('.scene');
+        
+        let isEnvelopeOpen = false;
+        let isLetterExpanded = false;
+        
+        heartSeal.addEventListener('click', function() {
+            if (!isEnvelopeOpen) {
+                // Kalbi çevir
+                this.classList.add('clicked');
+                
+                // Konfeti efekti
+                createConfetti();
+                
+                // Zarfı aç
+                setTimeout(() => {
+                    envelopeFlap.classList.add('open');
+                    setTimeout(() => {
+                        letter.classList.add('visible');
+                        isEnvelopeOpen = true;
+                    }, 500);
+                }, 300);
             }
         });
-
-        function updateTime() {
-            const now = new Date();
-            const turkiyeSaati = now.toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" });
-            turkiyeSaatiDiv.innerText = `${turkiyeSaati}`;
-            const utc = now.toUTCString().split(' ')[4];
-            gmtDiv.innerText = `GMT`;
+        
+        letter.addEventListener('click', function() {
+            if (isEnvelopeOpen && !isLetterExpanded) {
+                this.classList.add('expanded');
+                isLetterExpanded = true;
+            }
+        });
+        
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // Rastgele renk
+                const colors = ['#e94057', '#f27121', '#f8c9d6', '#ffcda3', '#aad9cd'];
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Rastgele boyut
+                const size = Math.random() * 8 + 5;
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+                
+                // Rastgele şekil
+                const shapes = ['circle', 'square', 'triangle'];
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                
+                if (shape === 'circle') {
+                    confetti.style.borderRadius = '50%';
+                } else if (shape === 'triangle') {
+                    confetti.style.width = '0';
+                    confetti.style.height = '0';
+                    confetti.style.backgroundColor = 'transparent';
+                    confetti.style.borderLeft = `${size/2}px solid transparent`;
+                    confetti.style.borderRight = `${size/2}px solid transparent`;
+                    confetti.style.borderBottom = `${size}px solid ${colors[Math.floor(Math.random() * colors.length)]}`;
+                }
+                
+                // Rastgele pozisyon
+                confetti.style.left = `${Math.random() * window.innerWidth}px`;
+                confetti.style.top = `${Math.random() * 100}px`;
+                
+                // Rastgele animasyon süresi
+                const duration = Math.random() * 2 + 2;
+                confetti.style.animation = `confetti-fall ${duration}s ease forwards`;
+                
+                // Rastgele gecikme
+                confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+                
+                document.body.appendChild(confetti);
+                
+                // Animasyon bittikten sonra kaldır
+                setTimeout(() => {
+                    confetti.remove();
+                }, duration * 1000);
+            }
         }
-
-        setInterval(updateTime, 1000);
     </script>
 </body>
 </html>
