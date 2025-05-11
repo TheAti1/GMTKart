@@ -329,8 +329,7 @@
             transition: opacity 0.5s ease;
         }
 
-        /* Yeni eklenen: Fotoğraf için stil */
-        .letter-photo {
+        .letter-back {
             position: absolute;
             top: 0;
             left: 0;
@@ -405,13 +404,16 @@
         const envelopeFlap   = document.querySelector('.envelope-flap');
         const letter         = document.querySelector('.letter');
         const letterContent  = document.querySelector('.letter-content');
-        const letterPhoto    = document.querySelector('.letter-photo');
+        const letterPhoto    = document.querySelector('.letter-back');  // direkt arka yüzü seçiyoruz
       
         let isEnvelopeOpen   = false;
         let isLetterExpanded = false;
         let isLetterFlipped  = false;
       
-        // 1) Zarfı aç
+        // Drag/touch suppression flag
+        let touchHandled     = false;
+      
+        // 1) Zarf açma
         heartSeal.addEventListener('click', () => {
           if (!isEnvelopeOpen) {
             heartSeal.classList.add('clicked');
@@ -423,7 +425,7 @@
           }
         });
       
-        // Ortak tap handler fonksiyonu
+        // Ortak tap handler
         function handleLetterTap() {
           if (!isEnvelopeOpen) return;
       
@@ -448,14 +450,15 @@
           }
         }
       
-        // --- Fare (desktop) için ---
+        // --- Fare (desktop) için drag vs click ---
         let mouseDownY = null;
-      
         letter.addEventListener('mousedown', e => {
           mouseDownY = e.clientY;
         });
         letter.addEventListener('click', e => {
-          // Eğer fare hareketi 5px'den fazla olduysa scroll/darg
+          // Eğer mobil touch handler tetiklediyse click’i yoksay
+          if (touchHandled) { touchHandled = false; return; }
+          // Drag ise yoksay
           if (mouseDownY !== null && Math.abs(e.clientY - mouseDownY) > 5) {
             mouseDownY = null;
             return;
@@ -464,11 +467,9 @@
           handleLetterTap();
         });
       
-        // --- Dokunmatik (mobil) için ---
+        // --- Dokunmatik (mobil) için swipe vs tap ---
         let touchStartY = null;
-      
         letter.addEventListener('touchstart', e => {
-          // Sadece bir parmakla başla
           if (e.touches.length === 1) {
             touchStartY = e.touches[0].clientY;
           }
@@ -477,16 +478,17 @@
         letter.addEventListener('touchend', e => {
           if (touchStartY === null) return;
           const touchEndY = e.changedTouches[0].clientY;
-          // 10px'den fazla hareket scroll, değilse tap
+          // Eğer hareket 10px'den fazla ise scroll, değilse tap
           if (Math.abs(touchEndY - touchStartY) > 10) {
             touchStartY = null;
             return;
           }
           touchStartY = null;
+          touchHandled = true;     // bir sonraki click'i iptal et
           handleLetterTap();
         });
       
-        // Konfeti fonksiyonu (aynı)
+        // --- Konfeti efekti ---
         function createConfetti() {
           for (let i = 0; i < 50; i++) {
             const c = document.createElement('div');
@@ -495,11 +497,11 @@
             const size   = Math.random()*8 + 5;
             c.style.width  = `${size}px`;
             c.style.height = `${size}px`;
-            // ... (şekil, renk, pozisyon, animasyon atamaları buraya)
+            // ... şekil, renk, pozisyon, animasyon atamaları aynı ...
             document.body.appendChild(c);
             setTimeout(() => c.remove(), (Math.random()*2+2)*1000);
           }
         }
-      </script>      
+      </script>          
 </body>
 </html>
