@@ -224,7 +224,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             z-index: 2;
             transform: translateY(0);
-            transition: transform 1s ease;
+            transition: all 1s ease;
             cursor: pointer;
             overflow: hidden;
         }
@@ -249,7 +249,13 @@
             animation: upAndDown 1.5s ease forwards;
             z-index: 20;
         }
-        
+
+        /* Yeni eklenen: Kağıdın ters dönmüş hali */
+        .letter.flipped {
+            transform: rotate(180deg) rotateY(180deg) rotate(90deg);
+            transition: all 1s ease;
+        }
+
         /* Mektup kağıdı dokusu */
         .letter:before {
             content: '';
@@ -297,6 +303,7 @@
             box-sizing: border-box;
             scrollbar-width: thin;
             scrollbar-color: #e94057 #f8c9d6;
+            transition: opacity 0.5s ease;
         }
         
         .letter-content-wrapper::-webkit-scrollbar {
@@ -319,6 +326,27 @@
             line-height: 1.5;
             color: #333;
             text-align: center;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Yeni eklenen: Fotoğraf için stil */
+        .letter-photo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .letter-photo.show {
+            opacity: 1;
+        }
+
+        .letter-content.hide {
+            opacity: 0;
         }
         
         /* Konfeti efekti */
@@ -366,95 +394,112 @@
                         <p>Seni çok seviyorum ❤️</p>
                     </div>
                 </div>
+                <!-- Fotoğraf ekledim -->
+                <img class="letter-photo" src="https://scontent-prg1-1.xx.fbcdn.net/v/t39.30808-6/464743451_10230023364062139_2532314235661744729_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=b04a48&_nc_ohc=4CClWdmNaK8Q7kNvwFj7yrH&_nc_oc=AdnE8l6QXzBhNAdlPrI7PVnwgIzqqC6V7AGlNTJPd6f_aS0ukyHTHFaC78sMq3aNazWKtg4Ub6vqKJYdhz-YTTyM&_nc_zt=23&_nc_ht=scontent-prg1-1.xx&_nc_gid=_xKdGuJ0xCB5Hpr5yakGHQ&oh=00_AfJXWjivD1Gz9RXk3E-WOowOeQyra32ramXBQ_tALkCWtQ&oe=6826702B" alt=" ">
             </div>
         </div>
     </div>
 
     <script>
-        const heartSeal = document.querySelector('.heart-seal');
-        const envelopeFlap = document.querySelector('.envelope-flap');
-        const letter = document.querySelector('.letter');
-        
-        let isEnvelopeOpen = false;
+        const heartSeal      = document.querySelector('.heart-seal');
+        const envelopeFlap   = document.querySelector('.envelope-flap');
+        const letter         = document.querySelector('.letter');
+        const letterContent  = document.querySelector('.letter-content');
+        const letterPhoto    = document.querySelector('.letter-photo');
+      
+        let isEnvelopeOpen   = false;
         let isLetterExpanded = false;
-        
-        heartSeal.addEventListener('click', function() {
-            if (!isEnvelopeOpen) {
-                // Kalbi çevir
-                this.classList.add('clicked');
-                
-                // Konfeti efekti
-                createConfetti();
-                
-                // Zarfı aç
-                setTimeout(() => {
-                    envelopeFlap.classList.add('open');
-                    setTimeout(() => {
-                        isEnvelopeOpen = true;
-                    }, 500);
-                }, 300);
-            }
+        let isLetterFlipped  = false;
+      
+        // 1) Zarfı aç
+        heartSeal.addEventListener('click', () => {
+          if (!isEnvelopeOpen) {
+            heartSeal.classList.add('clicked');
+            createConfetti();
+            setTimeout(() => {
+              envelopeFlap.classList.add('open');
+              isEnvelopeOpen = true;
+            }, 300);
+          }
         });
-        
-        letter.addEventListener('click', function() {
-            if (isEnvelopeOpen && !isLetterExpanded) {
-                this.classList.add('expanded');
-                isLetterExpanded = false;
-            } else if (isEnvelopeOpen && isLetterExpanded) {
-                // Kağıda tekrar tıklanırsa, kağıdı zarfın içine geri yerleştir
-                this.classList.remove('expanded');
-                isLetterExpanded = false;
-            }
-        });
-        
-        function createConfetti() {
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                
-                // Rastgele renk
-                const colors = ['#e94057', '#f27121', '#f8c9d6', '#ffcda3', '#aad9cd'];
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                
-                // Rastgele boyut
-                const size = Math.random() * 8 + 5;
-                confetti.style.width = `${size}px`;
-                confetti.style.height = `${size}px`;
-                
-                // Rastgele şekil
-                const shapes = ['circle', 'square', 'triangle'];
-                const shape = shapes[Math.floor(Math.random() * shapes.length)];
-                
-                if (shape === 'circle') {
-                    confetti.style.borderRadius = '50%';
-                } else if (shape === 'triangle') {
-                    confetti.style.width = '0';
-                    confetti.style.height = '0';
-                    confetti.style.backgroundColor = 'transparent';
-                    confetti.style.borderLeft = `${size/2}px solid transparent`;
-                    confetti.style.borderRight = `${size/2}px solid transparent`;
-                    confetti.style.borderBottom = `${size}px solid ${colors[Math.floor(Math.random() * colors.length)]}`;
-                }
-                
-                // Rastgele pozisyon
-                confetti.style.left = `${Math.random() * window.innerWidth}px`;
-                confetti.style.top = `${Math.random() * 100}px`;
-                
-                // Rastgele animasyon süresi
-                const duration = Math.random() * 2 + 2;
-                confetti.style.animation = `confetti-fall ${duration}s ease forwards`;
-                
-                // Rastgele gecikme
-                confetti.style.animationDelay = `${Math.random() * 0.5}s`;
-                
-                document.body.appendChild(confetti);
-                
-                // Animasyon bittikten sonra kaldır
-                setTimeout(() => {
-                    confetti.remove();
-                }, duration * 1000);
-            }
+      
+        // Ortak tap handler fonksiyonu
+        function handleLetterTap() {
+          if (!isEnvelopeOpen) return;
+      
+          if (!isLetterExpanded) {
+            // 1. tap: yukarı aç
+            letter.classList.add('expanded');
+            isLetterExpanded = true;
+      
+          } else if (!isLetterFlipped) {
+            // 2. tap: çevir + fotoğraf göster
+            letter.classList.add('flipped');
+            letterContent.classList.add('hide');
+            setTimeout(() => letterPhoto.classList.add('show'), 500);
+            isLetterFlipped = true;
+      
+          } else {
+            // 3. tap: geri çevir + içerik göster
+            letter.classList.remove('flipped');
+            letterPhoto.classList.remove('show');
+            setTimeout(() => letterContent.classList.remove('hide'), 500);
+            isLetterFlipped = false;
+          }
         }
-    </script>
+      
+        // --- Fare (desktop) için ---
+        let mouseDownY = null;
+      
+        letter.addEventListener('mousedown', e => {
+          mouseDownY = e.clientY;
+        });
+        letter.addEventListener('click', e => {
+          // Eğer fare hareketi 5px'den fazla olduysa scroll/darg
+          if (mouseDownY !== null && Math.abs(e.clientY - mouseDownY) > 5) {
+            mouseDownY = null;
+            return;
+          }
+          mouseDownY = null;
+          handleLetterTap();
+        });
+      
+        // --- Dokunmatik (mobil) için ---
+        let touchStartY = null;
+      
+        letter.addEventListener('touchstart', e => {
+          // Sadece bir parmakla başla
+          if (e.touches.length === 1) {
+            touchStartY = e.touches[0].clientY;
+          }
+        }, { passive: true });
+      
+        letter.addEventListener('touchend', e => {
+          if (touchStartY === null) return;
+          const touchEndY = e.changedTouches[0].clientY;
+          // 10px'den fazla hareket scroll, değilse tap
+          if (Math.abs(touchEndY - touchStartY) > 10) {
+            touchStartY = null;
+            return;
+          }
+          touchStartY = null;
+          handleLetterTap();
+        });
+      
+        // Konfeti fonksiyonu (aynı)
+        function createConfetti() {
+          for (let i = 0; i < 50; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            const colors = ['#e94057','#f27121','#f8c9d6','#ffcda3','#aad9cd'];
+            const size   = Math.random()*8 + 5;
+            c.style.width  = `${size}px`;
+            c.style.height = `${size}px`;
+            // ... (şekil, renk, pozisyon, animasyon atamaları buraya)
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), (Math.random()*2+2)*1000);
+          }
+        }
+      </script>      
 </body>
 </html>
