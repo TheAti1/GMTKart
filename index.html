@@ -35,6 +35,7 @@
             width: 360px;
             height: 400px;
             perspective: 1500px;
+            margin-bottom: 20px;
         }
         
         /* ZARF TASARIMI */
@@ -79,8 +80,8 @@
             pointer-events: none;
         }
         
-        /* Zarfın arkası */
-        .envelope-back {
+        /* Zarfın ana gövdesi */
+        .envelope-body {
             position: absolute;
             width: 100%;
             height: 100%;
@@ -89,56 +90,60 @@
             z-index: 1;
         }
         
-        /* Zarfın alt üçgeni */
+        /* Zarfın alt kısmı */
         .envelope-bottom {
             position: absolute;
-            bottom: 0;
-            left: 0;
             width: 100%;
-            height: 110px;
-            background-color: #eacbcb;
-            clip-path: polygon(0 0, 100% 0, 50% 100%);
-            z-index: 2;
+            height: 100%;
+            top: 0px;
+            left: 0;
+            background-color: #f3d7d7;
+            clip-path: polygon(0 0, 50% 50%, 100% 0);
+            z-index: 4;
+            transform: rotate(180deg);
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
         }
         
-        /* Zarfın yan üçgenleri */
+        /* Zarfın sol yan üçgeni */
         .envelope-left {
             position: absolute;
             top: 0;
             left: 0;
-            width: 170px;
+            width: 50%;
             height: 100%;
-            background-color: #e8c3c3;
+            background-color: #ebd0d0;
             clip-path: polygon(0 0, 100% 50%, 0 100%);
             z-index: 3;
         }
         
+        /* Zarfın sağ yan üçgeni */
         .envelope-right {
             position: absolute;
             top: 0;
             right: 0;
-            width: 170px;
+            width: 50%;
             height: 100%;
-            background-color: #e8c3c3;
+            background-color: #ebd0d0;
             clip-path: polygon(100% 0, 0 50%, 100% 100%);
             z-index: 3;
         }
         
-        /* Zarfın üst kapağı */
+        /* Zarfın üst kapağı (üçgen kapak) */
         .envelope-flap {
             position: absolute;
-            top: -110px;
-            left: 0;
             width: 100%;
-            height: 110px;
-            background-color: #ebd0d0;
-            clip-path: polygon(0 100%, 50% 0, 100% 100%);
-            transform-origin: bottom;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-color: #f3d7d7;
+            clip-path: polygon(0 0, 50% 50%, 100% 0);
+            transform-origin: top;
             transition: transform 1s ease;
             z-index: 4;
-            box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
         }
         
+        /* Kapak açıldığında */
         .envelope-flap.open {
             transform: rotateX(180deg);
             z-index: 1;
@@ -159,14 +164,14 @@
                 transparent 5px,
                 transparent 10px
             );
-            clip-path: polygon(0 100%, 50% 0, 100% 100%);
+            clip-path: polygon(0 0, 50% 50%, 100% 0);
             pointer-events: none;
         }
         
-        /* Kalp mühür */
+        /* Kalp mühür - zarfın üst kapağının ortasında */
         .heart-seal {
             position: absolute;
-            top: -15px;
+            top: 90px;
             left: 50%;
             transform: translateX(-50%) rotate(45deg);
             width: 30px;
@@ -174,7 +179,7 @@
             background-color: #e94057;
             cursor: pointer;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            z-index: 5;
+            z-index: 10;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
         }
         
@@ -212,26 +217,36 @@
             position: absolute;
             width: 300px;
             height: 180px;
-            background-color: #fff;
             top: 20px;
             left: 20px;
-            z-index: 0;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 1s ease;
-            cursor: pointer;
+            background-color: #fff;
             border-radius: 3px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .letter.visible {
-            opacity: 1;
+            z-index: 2;
             transform: translateY(0);
-            z-index: 3;
+            transition: transform 1s ease;
+            cursor: pointer;
+            overflow: hidden;
         }
         
+
+        @keyframes upAndDown {
+          0% {
+            transform: translateY(0);
+            z-index: 2;
+          }
+          30% {
+            transform: translateY(-200px);
+            z-index: 2;
+          }
+          100% {
+            transform: translateY(0);
+            z-index: 20;
+          }
+        } 
+
         .letter.expanded {
-            transform: translateY(-150px);
+            animation: upAndDown 1.5s ease forwards;
             z-index: 20;
         }
         
@@ -262,27 +277,48 @@
             height: 1px;
             background: linear-gradient(90deg, 
                 transparent, 
-                rgba(0,0,0,0.05) 20%, 
-                rgba(0,0,0,0.1) 50%, 
-                rgba(0,0,0,0.05) 80%, 
+                rgba(0,0,0,0.05) 100%, 
+                rgba(0,0,0,0.1) 100%, 
+                rgba(0,0,0,0.05) 100%, 
                 transparent
             );
             pointer-events: none;
         }
         
+        /* Kaydırılabilir içerik alanı */
+        .letter-content-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 15px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: #e94057 #f8c9d6;
+        }
+        
+        .letter-content-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .letter-content-wrapper::-webkit-scrollbar-track {
+            background: #f8c9d6;
+            border-radius: 4px;
+        }
+        
+        .letter-content-wrapper::-webkit-scrollbar-thumb {
+            background-color: #e94057;
+            border-radius: 4px;
+        }
+        
         .letter-content {
-            padding: 20px;
             font-family: 'Caveat', cursive;
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             line-height: 1.5;
             color: #333;
             text-align: center;
-            opacity: 0;
-            transition: opacity 0.5s ease 0.5s;
-        }
-        
-        .letter.expanded .letter-content {
-            opacity: 1;
         }
         
         /* Konfeti efekti */
@@ -308,11 +344,11 @@
     </style>
 </head>
 <body>
-    <h1 class="title">Canım Anneciğim</h1>
+    <h1 class="title">Canım Anneciğim <br> "Ali Tuna"</h1>
     
     <div class="scene">
         <div class="envelope">
-            <div class="envelope-back"></div>
+            <div class="envelope-body"></div>
             <div class="envelope-left"></div>
             <div class="envelope-right"></div>
             <div class="envelope-bottom"></div>
@@ -320,13 +356,15 @@
             <div class="heart-seal"></div>
             
             <div class="letter">
-                <div class="letter-content">
-                    <p>Sevgili Anneciğim,</p>
-                    <p>Bu hayatta bana verdiğin tüm sevgi, emek ve fedakarlıklar için teşekkür ederim.</p>
-                    <p>Sen benim ilk öğretmenim, en iyi arkadaşım ve en büyük kahramanımsın.</p>
-                    <p>Senin gibi bir anneye sahip olduğum için çok şanslıyım.</p>
-                    <p>Anneler Günün Kutlu Olsun!</p>
-                    <p>Seni çok seviyorum ❤️</p>
+                <div class="letter-content-wrapper">
+                    <div class="letter-content">
+                        <p>Sevgili Anneciğim,</p>
+                        <p>Bu hayatta bana verdiğin tüm sevgi, emek ve fedakarlıklar için teşekkür ederim.</p>
+                        <p>Sen benim ilk öğretmenim, en iyi arkadaşım ve en büyük kahramanımsın.</p>
+                        <p>Senin gibi bir anneye sahip olduğum için çok şanslıyım.</p>
+                        <p>Anneler Günün Kutlu Olsun!</p>
+                        <p>Seni çok seviyorum ❤️</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -336,7 +374,6 @@
         const heartSeal = document.querySelector('.heart-seal');
         const envelopeFlap = document.querySelector('.envelope-flap');
         const letter = document.querySelector('.letter');
-        const scene = document.querySelector('.scene');
         
         let isEnvelopeOpen = false;
         let isLetterExpanded = false;
@@ -353,7 +390,6 @@
                 setTimeout(() => {
                     envelopeFlap.classList.add('open');
                     setTimeout(() => {
-                        letter.classList.add('visible');
                         isEnvelopeOpen = true;
                     }, 500);
                 }, 300);
@@ -363,7 +399,11 @@
         letter.addEventListener('click', function() {
             if (isEnvelopeOpen && !isLetterExpanded) {
                 this.classList.add('expanded');
-                isLetterExpanded = true;
+                isLetterExpanded = false;
+            } else if (isEnvelopeOpen && isLetterExpanded) {
+                // Kağıda tekrar tıklanırsa, kağıdı zarfın içine geri yerleştir
+                this.classList.remove('expanded');
+                isLetterExpanded = false;
             }
         });
         
